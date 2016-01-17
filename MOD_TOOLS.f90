@@ -401,7 +401,7 @@ module mod_my_main_data
 !********************************************************************************
   subroutine my_alloc_p2_ptr(x,n)
 
-  use edu2d_constants   , only : p2
+  use mod_constants   , only : p2
 
   implicit none
   integer, intent(in) :: n
@@ -461,7 +461,7 @@ module mod_my_main_data
 !********************************************************************************
   subroutine my_alloc_p2_matrix_ptr(x,n,m)
 
-  use edu2d_constants   , only : p2
+  use mod_constants   , only : p2
 
   implicit none
   integer, intent(in) :: n, m
@@ -568,7 +568,8 @@ module mod_grid_data
 !*
 !********************************************************************************
  subroutine read_grid(datafile_grid_in, datafile_bcmap_in)
-
+  
+ use mod_constants   , only : p2
  use mod_my_main_data, only : nnodes, node, ntria, nelms, elm, nbound, bound
 
  implicit none
