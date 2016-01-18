@@ -73,40 +73,40 @@ end module mod_constants
 !----------------------------------------------------------
   type node_type
 !  to be read from a grid file
-   real(p2)                          :: x, y      !nodal coordinates
-   real(p2)                          :: z         !nodal depth
+   real(p2)                             :: x, y      !nodal coordinates
+   real(p2)                             :: z         !nodal depth
 !  to be constructed in the code
-   integer                           :: nnghbrs   !number of neighbors
+   integer                             :: nnghbrs   !number of neighbors
    integer,   dimension(:), pointer  :: nghbr     !list of neighbors
-   integer                           :: nelms     !number of elements
+   integer                             :: nelms     !number of elements
    integer,   dimension(:), pointer  :: elm       !list of elements
-   real(p2)                          :: vol       !dual-cell volume
-   integer                           :: bmark     !Boundary mark
-   integer                           :: nbmarks   !# of boundary marks
+   real(p2)                             :: vol       !dual-cell volume
+   integer                             :: bmark     !Boundary mark
+   integer                             :: nbmarks   !# of boundary marks
 !  to be computed in the code
    !Below are arrays always allocated.
-   real(p2), dimension(:)  , pointer :: u         !conservative variables
-   real(p2), dimension(:)  , pointer :: uexact    !conservative variables
-   real(p2), dimension(:,:), pointer :: gradu     !gradient of u
-   real(p2), dimension(:)  , pointer :: res       !residual (rhs)
-   real(p2)                          :: ar        ! Control volume aspect ratio
-   real(p2), dimension(:)  , pointer :: lsq2x2_cx !    Linear LSQ coefficient for wx
-   real(p2), dimension(:)  , pointer :: lsq2x2_cy !    Linear LSQ coefficient for wy
-   real(p2), dimension(:)  , pointer :: lsq5x5_cx ! Quadratic LSQ coefficient for wx
-   real(p2), dimension(:)  , pointer :: lsq5x5_cy ! Quadratic LSQ coefficient for wy
-   real(p2), dimension(:  ), pointer :: dx, dy    ! Extra data used by Quadratic LSQ
-   real(p2), dimension(:,:), pointer :: dw        ! Extra data used by Quadratic LSQ
+   real(p2), dimension(:)  , pointer  :: u         !conservative variables
+   real(p2), dimension(:)  , pointer  :: uexact    !conservative variables
+   real(p2), dimension(:,:), pointer  :: gradu     !gradient of u
+   real(p2), dimension(:)  , pointer  :: res       !residual (rhs)
+   real(p2)                             :: ar        ! Control volume aspect ratio
+   real(p2), dimension(:)  , pointer  :: lsq2x2_cx !    Linear LSQ coefficient for wx
+   real(p2), dimension(:)  , pointer  :: lsq2x2_cy !    Linear LSQ coefficient for wy
+   real(p2), dimension(:)  , pointer  :: lsq5x5_cx ! Quadratic LSQ coefficient for wx
+   real(p2), dimension(:)  , pointer  :: lsq5x5_cy ! Quadratic LSQ coefficient for wy
+   real(p2), dimension(:  ), pointer  :: dx, dy    ! Extra data used by Quadratic LSQ
+   real(p2), dimension(:,:), pointer  :: dw        ! Extra data used by Quadratic LSQ
 
    !Below are optional: Pointers need to be allocated in the main program if necessary.
-   real(p2), dimension(:)  , pointer :: du        !change in conservative variables
-   real(p2), dimension(:)  , pointer :: w         !primitive variables(optional)
-   real(p2), dimension(:,:), pointer :: gradw     !gradient of w
-   real(p2)                          :: phi       !limiter function (0 <= phi <= 1)
-   real(p2)                          :: dt        !local time step
-   real(p2)                          :: wsn       !Half the max wave speed at face
-   real(p2), dimension(:), pointer   :: r_temp    ! For GCR implementation
-   real(p2), dimension(:), pointer   :: u_temp    ! For GCR implementation
-   real(p2), dimension(:), pointer   :: w_temp    ! For GCR implementation
+   real(p2), dimension(:)  , pointer  :: du        !change in conservative variables
+   real(p2), dimension(:)  , pointer  :: w         !primitive variables(optional)
+   real(p2), dimension(:,:), pointer  :: gradw     !gradient of w
+   real(p2)                             :: phi       !limiter function (0 <= phi <= 1)
+   real(p2)                             :: dt        !local time step
+   real(p2)                             :: wsn       !Half the max wave speed at face
+   real(p2), dimension(:), pointer    :: r_temp    ! For GCR implementation
+   real(p2), dimension(:), pointer    :: u_temp    ! For GCR implementation
+   real(p2), dimension(:), pointer    :: w_temp    ! For GCR implementation
 
   end type node_type
   !----------------------------------------------------------
@@ -209,9 +209,9 @@ end module mod_constants
    real(p2),  dimension(:,:,:), pointer :: off  ! off-diagonal block of Jacobian matrix
   end type jac_type
 
-
  end module mod_grid_data_type
- !* 3. module my_main_data 
+
+!* 3. module my_main_data 
 !*
 !* This module defines the main data that will be used in the code.
 !
@@ -539,7 +539,7 @@ module mod_grid_data
 
  public :: read_grid
  public :: construct_grid_data
- public :: check_grid_data
+ !public :: check_grid_data
 
  contains
 !********************************************************************************
@@ -578,14 +578,14 @@ module mod_grid_data
 
 !Local variables
  integer         :: i, j, os, dummy_int
- character(len=3)::TEMPSTRING
+ character(len=3):: TEMPSTRING
  integer(p2)     :: TEMPINI
- integer(p2)     :: nnodes,ntria
+! integer(p2)     :: nnodes,ntria
 !--------------------------------------------------------------------------------
 ! 1. Read grid file>: datafile_grid_in
   ntria=0
   nnodes=0
-  write(*,*) "Reading the grid file....", datafile_grid_in
+  write(*,*) "Reading the grid file....", TRIM(datafile_grid_in)
 !  Open the input file.
   open(unit=1, file=datafile_grid_in, status="unknown", iostat=os)
   read(1,*) TEMPSTRING
@@ -602,6 +602,7 @@ module mod_grid_data
     endif
   enddo
   close(1)
+  nelms=ntria
   allocate(node(nnodes))
   allocate(elm(  nelms))
   open(unit=1, file=datafile_grid_in, status="unknown", iostat=os)
@@ -619,6 +620,7 @@ module mod_grid_data
     read(1,*) TEMPSTRING,TEMPINI,node(i)%x,node(i)%y,node(i)%z
   enddo
   close(1)
+  
 !  Write out the grid data.
    write(*,*)
    write(*,*) " Total numbers:"
@@ -685,14 +687,14 @@ implicit none
 
 !Local variables
 integer                       ::  i, j, k, ii, in, im, jelm, v1, v2, v3, v4
-real(p2)                      :: x1, x2, x3, x4, y1, y2, y3, y4, xm, ym, xc, yc
-real(p2)                      :: xj, yj, xm1, ym1, xm2, ym2, dsL,dsR,dx,dy
+real(p2)                       :: x1, x2, x3, x4, y1, y2, y3, y4, xm, ym, xc, yc
+real(p2)                       :: xj, yj, xm1, ym1, xm2, ym2, dsL,dsR,dx,dy
 logical                       :: found
 integer                       :: vL, vR, n1, n2, e1, e2
 integer                       :: vt1, vt2, ielm
 integer                       :: ave_nghbr, min_nghbr, max_nghbr, imin, imax
 integer                       :: iedge
-real(p2)                      :: ds
+real(p2)                       :: ds
 
 ! Some initialization
 v2 = 0
@@ -737,6 +739,7 @@ nedges = 0
 !      \       |         /  .  \    (x,y): centroid coordinates
 !       \      |        / (x,y) \     vol: volume of element
 !        o-----o       o---------o
+
 elements : do i = 1, nelms
 
    v1 = elm(i)%vtx(1)
@@ -942,7 +945,7 @@ elements2 : do i = 1, nelms
 ! Loop over edges
 ! Construct edge vector and directed area vector.
 !
-! Edge vector is a simple vector pointing froom n1 to n2.
+! Edge vector is a simple vector pointing from n1 to n2.
 ! For each edge, add the directed area vector (dav) from
 ! the left and right elements.
 !
@@ -1001,7 +1004,7 @@ elements2 : do i = 1, nelms
   edge(i)%ev    = edge(i)%ev / edge(i)%e
 
   end do edges
-
+  print*,edge(100)%dav,edge(100)%ev
 !--------------------------------------------------------------------------------
 ! Construct node neighbor data:
 !  pointers to the neighbor nodes(o)
@@ -1019,7 +1022,7 @@ elements2 : do i = 1, nelms
   do i = 1, nnodes
    node(i)%nnghbrs = 0
   end do
-  Loop over edges and distribute the node numbers:
+!  Loop over edges and distribute the node numbers:
 
   edges4 : do i = 1, nedges
 
@@ -1037,7 +1040,7 @@ elements2 : do i = 1, nelms
    node(n2)%nghbr(node(n2)%nnghbrs) = n1
 
   end do edges4 
-
+ end subroutine construct_grid_data
 !********************************************************************************
 !* Compute the area of the triangle defined by the nodes, 1, 2, 3.
 !*
@@ -1051,7 +1054,7 @@ elements2 : do i = 1, nelms
 !*
 !********************************************************************************
  function tri_area(x1,x2,x3,y1,y2,y3) result(area)
- use edu2d_constants, only : p2, half
+ use mod_constants, only : p2, half
  implicit none
  real(p2), intent(in) :: x1,x2,x3,y1,y2,y3
  real(p2) :: area
@@ -1059,3 +1062,4 @@ elements2 : do i = 1, nelms
   area = half*( x1*(y2-y3) + x2*(y3-y1) + x3*(y1-y2) )
 
  end function tri_area
+ end module mod_grid_data
