@@ -123,6 +123,7 @@ end module mod_constants
    integer                           :: nnghbrs  !number of neighbors
    integer,   dimension(:), pointer  :: nghbr    !list of neighbors
    real(p2)                          :: x, y     !cell center coordinates
+   real(p2)                          :: radius   !radius of circle in the triangle 
    real(p2)                          :: vol      !cell volume
 
    integer,  dimension(:)  , pointer :: edge     !list of edges
@@ -681,7 +682,7 @@ module mod_grid_data
 subroutine construct_grid_data
 
 use mod_my_main_data , only : nnodes, node, nelms, elm, nedges, edge, nbound, bound, face, nfaces
-use mod_constants    , only : p2, zero, half, third
+use mod_constants    , only : p2, zero, half, third, two
 use mod_my_allocation, only : my_alloc_int_ptr, my_alloc_p2_ptr, my_alloc_p2_matrix_ptr
 
 implicit none
@@ -769,10 +770,18 @@ elements : do i = 1, nelms
    call my_alloc_int_ptr(node(v3)%elm, node(v3)%nelms)
    node(v3)%elm(node(v3)%nelms) = i
 !   Triangle centroid and volume
+!   radius of circle in the triangle
+!   r=2*area/(a+b+c)
     elm(i)%x   = third*(x1+x2+x3)
     elm(i)%y   = third*(y1+y2+y3)
     elm(i)%vol = tri_area(x1,x2,x3,y1,y2,y3)
+    elm(i)%radius=two*elm(i)%vol/                     &
+    &       (sqrt((x2-x1)**2+(y2-y1)**2)+             &
+    &        sqrt((x3-x1)**2+(y3-y1)**2)+             &
+    &        sqrt((x2-x3)**2+(y2-y3)**2))            
+
  end do elements
+ 
 ! Median dual volume
 
   do i = 1, nnodes
@@ -1005,7 +1014,6 @@ elements2 : do i = 1, nelms
   edge(i)%ev    = edge(i)%ev / edge(i)%e
 
   end do edges
-  print*,edge(100)%dav,edge(100)%ev
 !--------------------------------------------------------------------------------
 ! Construct node neighbor data:
 !  pointers to the neighbor nodes(o)
@@ -1054,6 +1062,7 @@ do i = 1, nelms
    v3 = elm(i)%vtx(3)
    elm(i)%z=third*(node(v1)%z+node(v2)%z+node(v3)%z)
 enddo
+
 
 end subroutine construct_grid_data
 !********************************************************************************
