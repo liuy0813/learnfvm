@@ -1,3 +1,4 @@
+The way from open source to open source
 2016-1-17 22:50:45  夜跑归来，思路清晰
 00 deveolop plan
 00、加入时间模块，使用动步长，思路来自YC和Mike
