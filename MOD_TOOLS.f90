@@ -118,6 +118,7 @@ end module mod_constants
    integer                           :: nvtx     !number of vertices
    integer,   dimension(:), pointer  :: vtx      !list of vertices
    integer                           :: imt      ! material of element
+   real(p2)                          :: z         !nodal depth
 !  to be constructed in the code
    integer                           :: nnghbrs  !number of neighbors
    integer,   dimension(:), pointer  :: nghbr    !list of neighbors
@@ -1040,7 +1041,21 @@ elements2 : do i = 1, nelms
    node(n2)%nghbr(node(n2)%nnghbrs) = n1
 
   end do edges4 
- end subroutine construct_grid_data
+
+! for elment depth
+! mean of three node
+! ini
+do i = 1, nelms
+  elm(i)%z=0.
+enddo
+do i = 1, nelms
+   v1 = elm(i)%vtx(1)
+   v2 = elm(i)%vtx(2)
+   v3 = elm(i)%vtx(3)
+   elm(i)%z=third*(node(v1)%z+node(v2)%z+node(v3)%z)
+enddo
+
+end subroutine construct_grid_data
 !********************************************************************************
 !* Compute the area of the triangle defined by the nodes, 1, 2, 3.
 !*
